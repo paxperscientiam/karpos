@@ -1,32 +1,10 @@
 #!/usr/bin/env bash
 :
-# USE AT YOUR OWN DISCRETION
-# Last edited: 2015/05/09
-## Added support for multiple image types
-## Corrected problem of TeXShop not auto-opening final .pdf product.  
-# USE AT YOUR OWN DISCRETION
-# launcherLaTeX+Pdftex.sh is a script to be set in the "LaTeX" field of TeXShop's "Engine" settings.
-## should be stored in ~/Library/TeXShop/Engine
-# Credit:
-## Jesper Kristensen for created the bulk of this code:
-### http://jespertoftkristensen.com/JTK/Blog/Entries/2014/1/13_Organize_your_LaTeX_Project.html
-## Karthick Sundararajan for the awesome pictorial directory tree formula
-### http://karthicks.blogspot.com/2013/09/bash-sed-display-unix-directory.html
+shopt -s nocasematch
+shopt -s nullglob
+shopt -s extglob
 
-# Required directory structure (template)
-## Project
-##  +--Figures
-##  |    +--figure1.eps
-##  |    +--figure2.eps
-##  |    +--figureN.eps
-##  +--LaTeX
-##  |    +--main.tex
-##  |    +--include1.tex
-##  |    +--include2.tex
-##  |    +--includeN.tex
-##  +--Misc
-shopt -s nocasematch;
-
+unset IMG
 
 [[ ! -f ${PWD}/.karpos-root ]] && printf "Anchor not found!\n"
 
@@ -38,56 +16,19 @@ filename="${@:-1}"
 curdir="$(dirname "$(pwd)")"
 
 
+# required directories
+[[ ! -d $PWD/aux ]] && mkdir aux
+[[ ! -d $PWD/pdf ]] && mkdir pdf
 
 
-# # Check if the texfile, which is passed into this script, has a PWD of /LaTeX/  
-# if [[ "$dirparent" == __LaTeX ]]; then
-#     echo 'Parent directory is /LaTeX/ and that is correct!'
-# else
-#     echo "Parent directory of $filename must be /__LaTeX/$filename"
-#     echo "${@: -1}"
-#     exit 1
-# fi
+# optional directories
+[[ -d $PWD/figures ]] && IMG=TRUE
 
-# # Check if ../Misc/ exists
-# misctest=""$(dirname "$(pwd)")"/Misc"
-# if [ -d "$misctest" ]
-# then
-#     echo "../Misc/ exists!"
-# else
-#     echo "../Misc/ does not exist! Making..."
-#     mkdir "$misctest"
-# fi
 
-# texfile="${@: -1}" #Get last parameter passed from shell
-# texfile="${texfile%.*}" #This strips the extension
-
-# function dolatex {
-#     echo `pwd`
-#     cp ../Misc/* .
-#     cp ../Figures/*{.eps,.jpg,.jpeg,.pdf,.png} . # should try to copy any images with listed extensions
-#     pdflatex --file-line-error --synctex=1 $texfile
-#     mv $texfile.pdf $texfile.pdf.keep
-#     mv *{.eps,.jpg,.jpeg,.pdf,.png} ../Figures
-#     mv $texfile.pdf.keep $texfile.pdf
-#     ls -1 | grep -Ev ".*.(tex|pdf)$" | xargs -I {} mv {} ../Misc
-#     mv ${texfile%.*}.pdf ../
-#     rm -f *-eps-converted-to.pdf
-# }
 
 # function tree {
 #     find .. -name '*' | sed -e 's/^/|-/' -e 's/[^-][^\/]*\//|   /g' -e 's/|   \([A-Za-z0-9_.]\)/|   +--\1/'
 # }
 
-# # This block of code is where the magic happens!
-# dolatex
-# echo "LaTeX...complete."
 
-# # This will spit out a pictorial version of the project directory tree
-# if [ $( tree | wc -l ) -gt 47 ]; then  tree | head -n 47; echo "Directory tree has been truncated to 47 lines." ; else tree; echo "Full directory tree on display." ; fi
 
-# # This is a fix to get texshop to open the new pdf file.
-# set +B
-# echo "Opening "$curdir/$texfile.pdf""
-# open -a TeXShop -F "$curdir/$texfile.pdf"
-# set -B
